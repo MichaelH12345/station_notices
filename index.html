@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Departures</title>
+<style>
+  @font-face {
+    font-family: 'Open Sans Bold';
+    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Bold.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Regular.ttf') format('truetype');
+  }
+  body {
+    margin: 0;
+    background-color: black;
+    color: white;
+    font-family: 'Open Sans', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background-color: #001f4d;
+    border-bottom: 4px solid white;
+    padding-left: 15px;
+    flex-shrink: 0;
+  }
+  .header-title {
+    font-family: 'Open Sans Bold';
+    font-size: 4rem;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    top: 25px;
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    color: #001f4d;
+    font-size: 2.5rem;
+  }
+
+  #message-container {
+    flex: 1;
+    background-color: black;
+    padding: 0px 20px 20px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #message-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #message-carousel {
+    display: flex;
+    width: 200%;
+    transition: transform 0.75s ease-in-out;
+    transform: translateX(0);
+    height: 100%;
+  }
+
+.message-slide {
+  width: 50%;
+  flex-shrink: 0;
+  position: relative;
+  height: 100%;
+}
+
+.message-text {
+  position: absolute;
+  top: 25px;
+  width: 100%;
+  text-align: center;
+  font-size: 3rem;
+  max-width: 75%;
+  margin-left: 12.5%;
+}
+
+.slide-counter {
+  position: absolute;
+  bottom: 92px;
+  width: 100%;
+  font-size: 3rem;
+  color: white;
+  text-align: center;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 87.5px;
+  background-color: #001f4d;
+  border-top: 4px solid white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+#footer-message {
+  font-size: 2.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#footer-time { 
+  font-size: 3.5rem; 
+  font-family: 'Open Sans Bold'; 
+}
+#footer-time .label { 
+  font-size: 60%; 
+  font-family: 'Open Sans'; 
+}
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-title" id="header-title">Station Notices</div>
+    <div class="header-row">
+      <div class="time">R</div>
+    </div>
+  </header>
+
+  <div id="message-container">
+    <div id="message-content">
+      <div id="message-carousel">
+        <div class="message-slide">
+          <div class="message-text" id="current-message">Loading notices...</div>
+          <div class="slide-counter" id="current-counter">Page 1 of 1</div>
+        </div>
+        <div class="message-slide">
+          <div class="message-text" id="next-message"></div>
+          <div class="slide-counter" id="next-counter"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div id="footer-message"></div>
+    <div id="footer-page"></div>
+    <div id="footer-time">
+      <span class="label">Time now </span>
+      <span id="footer-time-value"></span>
+    </div>
+  </footer>
+
+<script>
+let footerMessage = document.getElementById('footer-message');
+let footerTimeValue = document.getElementById('footer-time-value');
+let currentMessage = document.getElementById('current-message');
+let nextMessage = document.getElementById('next-message');
+let currentCounter = document.getElementById('current-counter');
+let nextCounter = document.getElementById('next-counter');
+let carousel = document.getElementById('message-carousel');
+
+let stationCode = 'CAR'; // default station
+let API_URL = `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
+let locationName = stationCode;
+let processedMessages = [];
+let currentPage = 0;
+let lastPageChangeSecond = -10;
+let isTransitioning = false;
+
+function resetCarouselContainers() {
+  const container = document.getElementById('message-content');
+  container.innerHTML = `
+    <div id="message-carousel">
+      <div class="message-slide">
+        <div class="message-text" id="current-message">Loading notices...</div>
+        <div class="slide-counter" id="current-counter">Page 1 of 1</div>
+      </div>
+      <div class="message-slide">
+        <div class="message-text" id="next-message"></div>
+        <div class="slide-counter" id="next-counter"></div>
+      </div>
+    </div>
+  `;
+  currentMessage = document.getElementById('current-message');
+  nextMessage = document.getElementById('next-message');
+  currentCounter = document.getElementById('current-counter');
+  nextCounter = document.getElementById('next-counter');
+  carousel = document.getElementById('message-carousel');
+}
+
+function displayCurrentPage(withTransition = true) {
+  try {
+    if (processedMessages.length === 0) {
+      currentMessage.innerHTML = '';
+      currentCounter.textContent = '';
+      nextMessage.innerHTML = '';
+      nextCounter.textContent = '';
+      carousel.style.transition = 'none';
+      carousel.style.transform = 'translateX(0)';
+      void carousel.offsetWidth;
+      carousel.style.transition = 'transform 1s ease-in-out';
+      return;
+    }
+
+    const { text, counter } = processedMessages[currentPage];
+
+    if (processedMessages.length <= 1 || !withTransition) {
+      currentMessage.innerHTML = text;
+      currentCounter.textContent = counter;
+      nextMessage.innerHTML = '';
+      nextCounter.textContent = '';
+      carousel.style.transition = 'none';
+      carousel.style.transform = 'translateX(0)';
+      void carousel.offsetWidth;
+      carousel.style.transition = 'transform 1s ease-in-out';
+      return;
+    }
+
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    nextMessage.innerHTML = text;
+    nextCounter.textContent = counter;
+
+    void carousel.offsetWidth;
+
+    carousel.style.transform = 'translateX(-50%)';
+    console.log(`Sliding animation triggered: Page ${currentPage + 1}`);
+
+    let timeout = setTimeout(() => {
+      isTransitioning = false;
+      console.warn('Sliding failed, resetting carousel...');
+      resetCarouselContainers();
+    }, 1500);
+
+    carousel.addEventListener('transitionend', function handler() {
+      clearTimeout(timeout);
+      currentMessage.innerHTML = text;
+      currentCounter.textContent = counter;
+      nextMessage.innerHTML = '';
+      nextCounter.textContent = '';
+      carousel.style.transition = 'none';
+      carousel.style.transform = 'translateX(0)';
+      void carousel.offsetWidth;
+      carousel.style.transition = 'transform 1s ease-in-out';
+      isTransitioning = false;
+      carousel.removeEventListener('transitionend', handler);
+    }, { once: true });
+
+  } catch (err) {
+    console.error('Error during sliding animation:', err);
+    resetCarouselContainers();
+    setTimeout(displayCurrentPage, 1000, false);
+  }
+}
+
+function nextPage() {
+  if (processedMessages.length <= 1) return;
+  currentPage = (currentPage + 1) % processedMessages.length;
+  displayCurrentPage(true);
+}
+
+async function fetchNRCCMessages() {
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+
+    locationName = data.locationName || stationCode;
+    const rawMessages = data.nrccMessages || [];
+
+    let alertSummaries = [];
+    try {
+      const alertsResp = await fetch('https://corsproxy.io/https://www.nationalrail.co.uk/nreapi/incidents/alerts/');
+      if (alertsResp.ok) {
+        const alertsData = await alertsResp.json();
+        alertSummaries = alertsData
+          .filter(item => Array.isArray(item.affectedTocs) && item.affectedTocs.includes('National Rail'))
+          .map(item => ({
+            text: `${item.summary}.<br><br>For more details,<br>visit nationalrail.co.uk.`,
+            counter: ''
+          }));
+      }
+    } catch (alertErr) {
+      console.warn('Failed to fetch National Rail alerts:', alertErr);
+    }
+
+    const nrccProcessed = rawMessages.map(msg => {
+      let text = msg.value || '';
+      const cutIndex = text.indexOf('More details can be found in');
+      if (cutIndex !== -1) text = text.substring(0, cutIndex) + '<br><br>For more details,<br>visit nationalrail.co.uk.';
+      return { text, counter: '' };
+    });
+
+    // Add Welcome message if there is 0 or 1 other messages
+    processedMessages = [...alertSummaries, ...nrccProcessed];
+    if (processedMessages.length <= 1) {
+      processedMessages.unshift({
+        text: `Welcome to<br>${locationName}.<br><br>For live travel information, speak to station staff, download our app or visit nationalrail.co.uk.`,
+        counter: ''
+      });
+    }
+
+    processedMessages = processedMessages.map((item, index) => ({
+      text: item.text,
+      counter: `Page ${index + 1} of ${processedMessages.length}`
+    }));
+
+    currentPage = 0;
+    displayCurrentPage(false);
+
+  } catch (err) {
+    console.error('Failed to fetch NRCC messages:', err);
+    processedMessages = [{
+      text: `Welcome to<br>${locationName}.<br><br>For live travel information, speak to station staff, download our app or visit nationalrail.co.uk.`,
+      counter: 'Page 1 of 1'
+    }];
+    currentPage = 0;
+    displayCurrentPage(false);
+  }
+}
+
+// --- Initial fetch ---
+fetchNRCCMessages();
+setInterval(fetchNRCCMessages, 60000);
+
+// --- 15-minute full refresh ---
+setInterval(() => {
+  console.log('15-minute full refresh: clearing and restarting containers');
+  resetCarouselContainers();
+  fetchNRCCMessages();
+}, 15 * 60 * 1000);
+
+function updateFooterTime() {
+  const now = new Date();
+  const seconds = now.getSeconds();
+
+  footerTimeValue.textContent = now.toLocaleTimeString('en-GB', { 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit', 
+    hour12: false 
+  });
+
+  if (seconds % 10 === 0 && seconds !== lastPageChangeSecond) {
+    lastPageChangeSecond = seconds;
+    nextPage();
+  }
+}
+
+setInterval(updateFooterTime, 1000);
+updateFooterTime();
+
+function updateFooterDate() {
+  const now = new Date();
+  const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
+  const day = now.getDate();
+  const month = now.toLocaleDateString('en-GB', { month: 'long' });
+  function getOrdinal(n) {
+    if (n >= 11 && n <= 13) return n + 'th';
+    switch (n % 10) {
+      case 1: return n + 'st';
+      case 2: return n + 'nd';
+      case 3: return n + 'rd';
+      default: return n + 'th';
+    }
+  }
+  footerMessage.textContent = `${weekday} ${getOrdinal(day)} ${month}`;
+}
+updateFooterDate();
+
+// --- Clickable header to change station ---
+const headerTitle = document.getElementById('header-title');
+headerTitle.style.cursor = 'pointer';
+headerTitle.title = 'Click to change station code';
+
+headerTitle.addEventListener('click', () => {
+  const newStation = prompt('Enter new station code (e.g., CAR, PAD):');
+  if (newStation && newStation.trim() !== '') {
+    stationCode = newStation.trim().toUpperCase();
+    API_URL = `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
+
+    currentMessage.innerHTML = 'Loading notices...';
+    currentCounter.textContent = '';
+    nextMessage.innerHTML = '';
+    nextCounter.textContent = '';
+
+    fetchNRCCMessages();
+  }
+});
+</script>
+</body>
+</html>
