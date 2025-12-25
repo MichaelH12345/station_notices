@@ -3,16 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Departures</title>
+<title>Station Notices</title>
+
+<!-- Google Fonts for reliable Open Sans loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-  @font-face {
-    font-family: 'Open Sans Bold';
-    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Bold.ttf') format('truetype');
-  }
-  @font-face {
-    font-family: 'Open Sans';
-    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Regular.ttf') format('truetype');
-  }
   body {
     margin: 0;
     background-color: black;
@@ -30,7 +28,8 @@
     flex-shrink: 0;
   }
   .header-title {
-    font-family: 'Open Sans Bold';
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
     font-size: 4rem;
     margin: 0;
     width: 100%;
@@ -64,63 +63,65 @@
     display: flex;
     width: 200%;
     transition: transform 0.75s ease-in-out;
-    transform: translateX(0);
+    transform: translateX(-50%); /* Second slide is the visible/resting position */
     height: 100%;
   }
 
-.message-slide {
-  width: 50%;
-  flex-shrink: 0;
-  position: relative;
-  height: 100%;
-}
+  .message-slide {
+    width: 50%;
+    flex-shrink: 0;
+    position: relative;
+    height: 100%;
+  }
 
-.message-text {
-  position: absolute;
-  top: 25px;
-  width: 100%;
-  text-align: center;
-  font-size: 3rem;
-  max-width: 75%;
-  margin-left: 12.5%;
-}
+  .message-text {
+    position: absolute;
+    top: 25px;
+    width: 100%;
+    text-align: center;
+    font-size: 3rem;
+    max-width: 75%;
+    margin-left: 12.5%;
+  }
 
-.slide-counter {
-  position: absolute;
-  bottom: 92px;
-  width: 100%;
-  font-size: 3rem;
-  color: white;
-  text-align: center;
-}
+  .slide-counter {
+    position: absolute;
+    bottom: 92px;
+    width: 100%;
+    font-size: 3rem;
+    color: white;
+    text-align: center;
+  }
 
-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 87.5px;
-  background-color: #001f4d;
-  border-top: 4px solid white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 15px;
-  box-sizing: border-box;
-}
-#footer-message {
-  font-size: 2.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#footer-time { 
-  font-size: 3.5rem; 
-  font-family: 'Open Sans Bold'; 
-}
-#footer-time .label { 
-  font-size: 60%; 
-  font-family: 'Open Sans'; 
-}
+  footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 87.5px;
+    background-color: #001f4d;
+    border-top: 4px solid white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+  #footer-message {
+    font-size: 2.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #footer-time { 
+    font-size: 3.5rem; 
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+  }
+  #footer-time .label { 
+    font-size: 60%; 
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+  }
 </style>
 </head>
 <body>
@@ -134,13 +135,15 @@ footer {
   <div id="message-container">
     <div id="message-content">
       <div id="message-carousel">
+        <!-- Left slide: incoming new page (comes from left) -->
         <div class="message-slide">
-          <div class="message-text" id="current-message">Loading notices...</div>
-          <div class="slide-counter" id="current-counter">Page 1 of 1</div>
+          <div class="message-text" id="incoming-message">Loading notices...</div>
+          <div class="slide-counter" id="incoming-counter">Page 1 of 1</div>
         </div>
+        <!-- Right slide: currently visible / resting position -->
         <div class="message-slide">
-          <div class="message-text" id="next-message"></div>
-          <div class="slide-counter" id="next-counter"></div>
+          <div class="message-text" id="visible-message"></div>
+          <div class="slide-counter" id="visible-counter"></div>
         </div>
       </div>
     </div>
@@ -158,14 +161,15 @@ footer {
 <script>
 let footerMessage = document.getElementById('footer-message');
 let footerTimeValue = document.getElementById('footer-time-value');
-let currentMessage = document.getElementById('current-message');
-let nextMessage = document.getElementById('next-message');
-let currentCounter = document.getElementById('current-counter');
-let nextCounter = document.getElementById('next-counter');
+let incomingMessage = document.getElementById('incoming-message');
+let visibleMessage = document.getElementById('visible-message');
+let incomingCounter = document.getElementById('incoming-counter');
+let visibleCounter = document.getElementById('visible-counter');
 let carousel = document.getElementById('message-carousel');
 
-let stationCode = 'CAR'; // default station
+let stationCode = localStorage.getItem('stationCode') || 'CAR';
 let API_URL = `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
+localStorage.setItem('stationCode', stationCode);
 let locationName = stationCode;
 let processedMessages = [];
 let currentPage = 0;
@@ -177,77 +181,81 @@ function resetCarouselContainers() {
   container.innerHTML = `
     <div id="message-carousel">
       <div class="message-slide">
-        <div class="message-text" id="current-message">Loading notices...</div>
-        <div class="slide-counter" id="current-counter">Page 1 of 1</div>
+        <div class="message-text" id="incoming-message">Loading notices...</div>
+        <div class="slide-counter" id="incoming-counter">Page 1 of 1</div>
       </div>
       <div class="message-slide">
-        <div class="message-text" id="next-message"></div>
-        <div class="slide-counter" id="next-counter"></div>
+        <div class="message-text" id="visible-message"></div>
+        <div class="slide-counter" id="visible-counter"></div>
       </div>
     </div>
   `;
-  currentMessage = document.getElementById('current-message');
-  nextMessage = document.getElementById('next-message');
-  currentCounter = document.getElementById('current-counter');
-  nextCounter = document.getElementById('next-counter');
+  incomingMessage = document.getElementById('incoming-message');
+  visibleMessage = document.getElementById('visible-message');
+  incomingCounter = document.getElementById('incoming-counter');
+  visibleCounter = document.getElementById('visible-counter');
   carousel = document.getElementById('message-carousel');
 }
 
 function displayCurrentPage(withTransition = true) {
   try {
     if (processedMessages.length === 0) {
-      currentMessage.innerHTML = '';
-      currentCounter.textContent = '';
-      nextMessage.innerHTML = '';
-      nextCounter.textContent = '';
+      incomingMessage.innerHTML = '';
+      incomingCounter.textContent = '';
+      visibleMessage.innerHTML = '';
+      visibleCounter.textContent = '';
       carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(0)';
+      carousel.style.transform = 'translateX(-50%)';
       void carousel.offsetWidth;
-      carousel.style.transition = 'transform 1s ease-in-out';
+      carousel.style.transition = 'transform 0.75s ease-in-out';
       return;
     }
 
     const { text, counter } = processedMessages[currentPage];
 
+    // Single page or no transition needed → show directly in visible slide
     if (processedMessages.length <= 1 || !withTransition) {
-      currentMessage.innerHTML = text;
-      currentCounter.textContent = counter;
-      nextMessage.innerHTML = '';
-      nextCounter.textContent = '';
+      visibleMessage.innerHTML = text;
+      visibleCounter.textContent = counter;
+      incomingMessage.innerHTML = '';
+      incomingCounter.textContent = '';
       carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(0)';
+      carousel.style.transform = 'translateX(-50%)';
       void carousel.offsetWidth;
-      carousel.style.transition = 'transform 1s ease-in-out';
+      carousel.style.transition = 'transform 0.75s ease-in-out';
       return;
     }
 
     if (isTransitioning) return;
     isTransitioning = true;
 
-    nextMessage.innerHTML = text;
-    nextCounter.textContent = counter;
+    // Place new content in the incoming (left) slide
+    incomingMessage.innerHTML = text;
+    incomingCounter.textContent = counter;
 
-    void carousel.offsetWidth;
+    void carousel.offsetWidth; // Force reflow
 
-    carousel.style.transform = 'translateX(-50%)';
-    console.log(`Sliding animation triggered: Page ${currentPage + 1}`);
+    // Animate: move carousel right → incoming slide enters from left
+    carousel.style.transform = 'translateX(0)';
 
     let timeout = setTimeout(() => {
       isTransitioning = false;
       console.warn('Sliding failed, resetting carousel...');
       resetCarouselContainers();
+      displayCurrentPage(false);
     }, 1500);
 
     carousel.addEventListener('transitionend', function handler() {
       clearTimeout(timeout);
-      currentMessage.innerHTML = text;
-      currentCounter.textContent = counter;
-      nextMessage.innerHTML = '';
-      nextCounter.textContent = '';
+      // After animation, copy content to visible slide and reset position
+      visibleMessage.innerHTML = text;
+      visibleCounter.textContent = counter;
+      incomingMessage.innerHTML = '';
+      incomingCounter.textContent = '';
       carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(0)';
+      carousel.style.transform = 'translateX(-50%)';
       void carousel.offsetWidth;
-      carousel.style.transition = 'transform 1s ease-in-out';
+      carousel.style.transition = 'transform 0.75s ease-in-out';
       isTransitioning = false;
       carousel.removeEventListener('transitionend', handler);
     }, { once: true });
@@ -255,7 +263,7 @@ function displayCurrentPage(withTransition = true) {
   } catch (err) {
     console.error('Error during sliding animation:', err);
     resetCarouselContainers();
-    setTimeout(displayCurrentPage, 1000, false);
+    setTimeout(() => displayCurrentPage(false), 1000);
   }
 }
 
@@ -276,7 +284,7 @@ async function fetchNRCCMessages() {
 
     let alertSummaries = [];
     try {
-      const alertsResp = await fetch('https://corsproxy.io/https://www.nationalrail.co.uk/nreapi/incidents/alerts/');
+      const alertsResp = await fetch('https://corsproxy.io/?https://www.nationalrail.co.uk/nreapi/incidents/alerts/');
       if (alertsResp.ok) {
         const alertsData = await alertsResp.json();
         alertSummaries = alertsData
@@ -297,8 +305,9 @@ async function fetchNRCCMessages() {
       return { text, counter: '' };
     });
 
-    // Add Welcome message if there is 0 or 1 other messages
     processedMessages = [...alertSummaries, ...nrccProcessed];
+
+    // Add welcome message if no other messages
     if (processedMessages.length <= 1) {
       processedMessages.unshift({
         text: `Welcome to<br>${locationName}.<br><br>For live travel information, speak to station staff, download our app or visit nationalrail.co.uk.`,
@@ -306,6 +315,7 @@ async function fetchNRCCMessages() {
       });
     }
 
+    // Add page counters
     processedMessages = processedMessages.map((item, index) => ({
       text: item.text,
       counter: `Page ${index + 1} of ${processedMessages.length}`
@@ -325,13 +335,13 @@ async function fetchNRCCMessages() {
   }
 }
 
-// --- Initial fetch ---
+// Initial load and periodic updates
 fetchNRCCMessages();
 setInterval(fetchNRCCMessages, 60000);
 
-// --- 15-minute full refresh ---
+// Full refresh every 15 minutes
 setInterval(() => {
-  console.log('15-minute full refresh: clearing and restarting containers');
+  console.log('15-minute full refresh');
   resetCarouselContainers();
   fetchNRCCMessages();
 }, 15 * 60 * 1000);
@@ -347,6 +357,7 @@ function updateFooterTime() {
     hour12: false 
   });
 
+  // Advance page every 10 seconds
   if (seconds % 10 === 0 && seconds !== lastPageChangeSecond) {
     lastPageChangeSecond = seconds;
     nextPage();
@@ -361,6 +372,7 @@ function updateFooterDate() {
   const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
   const day = now.getDate();
   const month = now.toLocaleDateString('en-GB', { month: 'long' });
+  
   function getOrdinal(n) {
     if (n >= 11 && n <= 13) return n + 'th';
     switch (n % 10) {
@@ -374,7 +386,7 @@ function updateFooterDate() {
 }
 updateFooterDate();
 
-// --- Clickable header to change station ---
+// Click header to change station
 const headerTitle = document.getElementById('header-title');
 headerTitle.style.cursor = 'pointer';
 headerTitle.title = 'Click to change station code';
@@ -383,12 +395,13 @@ headerTitle.addEventListener('click', () => {
   const newStation = prompt('Enter new station code (e.g., CAR, PAD):');
   if (newStation && newStation.trim() !== '') {
     stationCode = newStation.trim().toUpperCase();
+    localStorage.setItem('stationCode', stationCode);
     API_URL = `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
 
-    currentMessage.innerHTML = 'Loading notices...';
-    currentCounter.textContent = '';
-    nextMessage.innerHTML = '';
-    nextCounter.textContent = '';
+    incomingMessage.innerHTML = 'Loading notices...';
+    visibleMessage.innerHTML = '';
+    incomingCounter.textContent = '';
+    visibleCounter.textContent = '';
 
     fetchNRCCMessages();
   }
