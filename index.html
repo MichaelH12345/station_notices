@@ -122,6 +122,17 @@
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
   }
+
+    .fade-in {
+    animation: fadeIn 0.75s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+
 </style>
 </head>
 <body>
@@ -404,6 +415,31 @@ headerTitle.addEventListener('click', () => {
     visibleCounter.textContent = '';
 
     fetchNRCCMessages();
+  }
+});
+
+function resetToFirstMessageWithFade() {
+  currentPage = 0;
+  displayCurrentPage(false);
+
+  // Add fade-in effect
+  visibleMessage.classList.add('fade-in');
+  visibleCounter.classList.add('fade-in');
+
+  // Remove class after animation so it can be applied again later
+  setTimeout(() => {
+    visibleMessage.classList.remove('fade-in');
+    visibleCounter.classList.remove('fade-in');
+  }, 750);
+}
+
+// Reset messages on window resize
+window.addEventListener('resize', resetToFirstMessageWithFade);
+
+// Reset messages when tab becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    resetToFirstMessageWithFade();
   }
 });
 </script>
