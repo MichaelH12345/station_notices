@@ -308,12 +308,24 @@ async function fetchNRCCMessages() {
       console.warn('Failed to fetch National Rail alerts:', alertErr);
     }
 
-    const nrccProcessed = rawMessages.map(msg => {
-      let text = msg.value || '';
-      const cutIndex = text.indexOf('More details can be found in');
-      if (cutIndex !== -1) text = text.substring(0, cutIndex) + '<br><br>For more details,<br>visit nationalrail.co.uk.';
-      return { text, counter: '' };
-    });
+const nrccProcessed = rawMessages.map(msg => {
+  let text = msg.value || '';
+  const phrases = [
+    'Latest information can be found in',
+    'More details can be found in'
+  ];
+
+  for (const phrase of phrases) {
+    const cutIndex = text.indexOf(phrase);
+    if (cutIndex !== -1) {
+      text = text.substring(0, cutIndex) + '<br><br>For more details,<br>visit nationalrail.co.uk.';
+      break; // Stop checking other phrases once one is found
+    }
+  }
+
+  return { text, counter: '' };
+});
+
 
     processedMessages = [...alertSummaries, ...nrccProcessed];
 
