@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Station Notices</title>
-
 <!-- Google Fonts for reliable Open Sans loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +33,7 @@
     width: 100%;
     text-align: center;
     position: relative;
-    top: 25px;
+    top: 26.125px;
   }
   .header-row {
     display: flex;
@@ -42,7 +41,6 @@
     color: #001f4d;
     font-size: 2.5rem;
   }
-
   #message-container {
     flex: 1;
     background-color: black;
@@ -51,28 +49,24 @@
     display: flex;
     flex-direction: column;
   }
-
   #message-content {
     flex: 1;
     position: relative;
     overflow: hidden;
   }
-
   #message-carousel {
     display: flex;
     width: 200%;
     transition: transform 0.75s ease-in-out;
-    transform: translateX(-50%); /* Second slide is the visible/resting position */
+    transform: translateX(0); /* First slide is the visible/resting position */
     height: 100%;
   }
-
   .message-slide {
     width: 50%;
     flex-shrink: 0;
     position: relative;
     height: 100%;
   }
-
   .message-text {
     position: absolute;
     top: 25px;
@@ -82,7 +76,6 @@
     max-width: 75%;
     margin-left: 12.5%;
   }
-
   .slide-counter {
     position: absolute;
     bottom: 92px;
@@ -91,7 +84,6 @@
     color: white;
     text-align: center;
   }
-
   footer {
     position: fixed;
     bottom: 0;
@@ -111,27 +103,23 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  #footer-time { 
-    font-size: 3.5rem; 
+  #footer-time {
+    font-size: 3.5rem;
     font-family: 'Open Sans', sans-serif;
     font-weight: 700;
   }
-  #footer-time .label { 
-    font-size: 60%; 
+  #footer-time .label {
+    font-size: 60%;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
   }
-
-    .fade-in {
+  .fade-in {
     animation: fadeIn 1s ease-in-out;
   }
-
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-
-
 </style>
 </head>
 <body>
@@ -141,24 +129,22 @@
       <div class="time">R</div>
     </div>
   </header>
-
   <div id="message-container">
     <div id="message-content">
       <div id="message-carousel">
-        <!-- Left slide: incoming new page (comes from left) -->
+        <!-- Left slide: currently visible / resting position -->
         <div class="message-slide">
-          <div class="message-text" id="incoming-message">Loading notices...</div>
-          <div class="slide-counter" id="incoming-counter">Page 1 of 1</div>
+          <div class="message-text" id="visible-message">Loading notices...</div>
+          <div class="slide-counter" id="visible-counter">Page 1 of 1</div>
         </div>
-        <!-- Right slide: currently visible / resting position -->
+        <!-- Right slide: incoming new page (comes from right) -->
         <div class="message-slide">
-          <div class="message-text" id="visible-message"></div>
-          <div class="slide-counter" id="visible-counter"></div>
+          <div class="message-text" id="incoming-message"></div>
+          <div class="slide-counter" id="incoming-counter"></div>
         </div>
       </div>
     </div>
   </div>
-
   <footer>
     <div id="footer-message"></div>
     <div id="footer-page"></div>
@@ -167,7 +153,6 @@
       <span id="footer-time-value"></span>
     </div>
   </footer>
-
 <script>
 let footerMessage = document.getElementById('footer-message');
 let footerTimeValue = document.getElementById('footer-time-value');
@@ -191,12 +176,12 @@ function resetCarouselContainers() {
   container.innerHTML = `
     <div id="message-carousel">
       <div class="message-slide">
-        <div class="message-text" id="incoming-message">Loading notices...</div>
-        <div class="slide-counter" id="incoming-counter">Page 1 of 1</div>
+        <div class="message-text" id="visible-message">Loading notices...</div>
+        <div class="slide-counter" id="visible-counter">Page 1 of 1</div>
       </div>
       <div class="message-slide">
-        <div class="message-text" id="visible-message"></div>
-        <div class="slide-counter" id="visible-counter"></div>
+        <div class="message-text" id="incoming-message"></div>
+        <div class="slide-counter" id="incoming-counter"></div>
       </div>
     </div>
   `;
@@ -215,7 +200,7 @@ function displayCurrentPage(withTransition = true) {
       visibleMessage.innerHTML = '';
       visibleCounter.textContent = '';
       carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(-50%)';
+      carousel.style.transform = 'translateX(0)';
       void carousel.offsetWidth;
       carousel.style.transition = 'transform 0.75s ease-in-out';
       return;
@@ -230,7 +215,7 @@ function displayCurrentPage(withTransition = true) {
       incomingMessage.innerHTML = '';
       incomingCounter.textContent = '';
       carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(-50%)';
+      carousel.style.transform = 'translateX(0)';
       void carousel.offsetWidth;
       carousel.style.transition = 'transform 0.75s ease-in-out';
       return;
@@ -239,14 +224,14 @@ function displayCurrentPage(withTransition = true) {
     if (isTransitioning) return;
     isTransitioning = true;
 
-    // Place new content in the incoming (left) slide
+    // Place new content in the incoming (right) slide
     incomingMessage.innerHTML = text;
     incomingCounter.textContent = counter;
 
     void carousel.offsetWidth; // Force reflow
 
-    // Animate: move carousel right → incoming slide enters from left
-    carousel.style.transform = 'translateX(0)';
+    // Animate: move carousel left → new page enters from the right
+    carousel.style.transform = 'translateX(-50%)';
 
     let timeout = setTimeout(() => {
       isTransitioning = false;
@@ -263,7 +248,7 @@ function displayCurrentPage(withTransition = true) {
       incomingMessage.innerHTML = '';
       incomingCounter.textContent = '';
       carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(-50%)';
+      carousel.style.transform = 'translateX(0)';
       void carousel.offsetWidth;
       carousel.style.transition = 'transform 0.75s ease-in-out';
       isTransitioning = false;
@@ -288,8 +273,8 @@ async function fetchNRCCMessages() {
     const response = await fetch(API_URL);
     if (!response.ok) throw new Error('API error');
     const data = await response.json();
-
     locationName = data.locationName || stationCode;
+
     const rawMessages = data.nrccMessages || [];
 
     let alertSummaries = [];
@@ -308,28 +293,24 @@ async function fetchNRCCMessages() {
       console.warn('Failed to fetch National Rail alerts:', alertErr);
     }
 
-const nrccProcessed = rawMessages.map(msg => {
-  let text = msg.value || '';
-  const phrases = [
-    'Latest information can be found in',
-    'More details can be found in'
-  ];
-
-  for (const phrase of phrases) {
-    const cutIndex = text.indexOf(phrase);
-    if (cutIndex !== -1) {
-      text = text.substring(0, cutIndex) + '<br><br>For more details,<br>visit nationalrail.co.uk.';
-      break; // Stop checking other phrases once one is found
-    }
-  }
-
-  return { text, counter: '' };
-});
-
+    const nrccProcessed = rawMessages.map(msg => {
+      let text = msg.value || '';
+      const phrases = [
+        'Latest information can be found in',
+        'More details can be found in'
+      ];
+      for (const phrase of phrases) {
+        const cutIndex = text.indexOf(phrase);
+        if (cutIndex !== -1) {
+          text = text.substring(0, cutIndex) + '<br><br>For more details,<br>visit nationalrail.co.uk.';
+          break;
+        }
+      }
+      return { text, counter: '' };
+    });
 
     processedMessages = [...alertSummaries, ...nrccProcessed];
 
-    // Add welcome message if no other messages
     if (processedMessages.length <= 1) {
       processedMessages.unshift({
         text: `Welcome to<br>${locationName}.<br><br>For live travel information, speak to station staff, download our app or visit nationalrail.co.uk.`,
@@ -337,7 +318,6 @@ const nrccProcessed = rawMessages.map(msg => {
       });
     }
 
-    // Add page counters
     processedMessages = processedMessages.map((item, index) => ({
       text: item.text,
       counter: `Page ${index + 1} of ${processedMessages.length}`
@@ -372,14 +352,13 @@ function updateFooterTime() {
   const now = new Date();
   const seconds = now.getSeconds();
 
-  footerTimeValue.textContent = now.toLocaleTimeString('en-GB', { 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit', 
-    hour12: false 
+  footerTimeValue.textContent = now.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
   });
 
-  // Advance page every 10 seconds
   if (seconds % 10 === 0 && seconds !== lastPageChangeSecond) {
     lastPageChangeSecond = seconds;
     nextPage();
@@ -394,7 +373,7 @@ function updateFooterDate() {
   const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
   const day = now.getDate();
   const month = now.toLocaleDateString('en-GB', { month: 'long' });
-  
+
   function getOrdinal(n) {
     if (n >= 11 && n <= 13) return n + 'th';
     switch (n % 10) {
@@ -420,10 +399,10 @@ headerTitle.addEventListener('click', () => {
     localStorage.setItem('stationCode', stationCode);
     API_URL = `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
 
-    incomingMessage.innerHTML = 'Loading notices...';
-    visibleMessage.innerHTML = '';
-    incomingCounter.textContent = '';
+    visibleMessage.innerHTML = 'Loading notices...';
+    incomingMessage.innerHTML = '';
     visibleCounter.textContent = '';
+    incomingCounter.textContent = '';
 
     fetchNRCCMessages();
   }
@@ -432,22 +411,15 @@ headerTitle.addEventListener('click', () => {
 function resetToFirstMessageWithFade() {
   currentPage = 0;
   displayCurrentPage(false);
-
-  // Add fade-in effect
   visibleMessage.classList.add('fade-in');
   visibleCounter.classList.add('fade-in');
-
-  // Remove class after animation so it can be applied again later
   setTimeout(() => {
     visibleMessage.classList.remove('fade-in');
     visibleCounter.classList.remove('fade-in');
   }, 750);
 }
 
-// Reset messages on window resize
 window.addEventListener('resize', resetToFirstMessageWithFade);
-
-// Reset messages when tab becomes visible again
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     resetToFirstMessageWithFade();
