@@ -9,6 +9,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
 <style>
+  @font-face {
+    font-family: 'Open Sans Bold';
+    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Bold.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Regular.ttf') format('truetype');
+  }
   body {
     margin: 0;
     background-color: black;
@@ -19,26 +27,24 @@
     display: flex;
     flex-direction: column;
   }
-  header {
-    background-color: #001f4d;
-    border-bottom: 4px solid white;
-    padding-left: 15px;
-    flex-shrink: 0;
-  }
+header {
+  background-color: #001f4d;
+  border-bottom: 4px solid white;
+  padding-left: 15px;
+  height: 140px;                 /* controls vertical spacing */
+  display: flex;
+  justify-content: center;
+  align-items: center;           /* vertical centring */
+}
+
   .header-title {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 700;
+    font-family: 'Open Sans Bold';
     font-size: 4rem;
-    margin: 0;
-    width: 100%;
-    text-align: center;
-    position: relative;
-    top: 26.125px;
+    align-items: center;
   }
   .header-row {
     display: flex;
     align-items: center;
-    color: #001f4d;
     font-size: 2.5rem;
   }
   #message-container {
@@ -126,7 +132,7 @@
   <header>
     <div class="header-title" id="header-title">Information</div>
     <div class="header-row">
-      <div class="time">R</div>
+      <div class="time"></div>
     </div>
   </header>
   <div id="message-container">
