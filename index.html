@@ -119,13 +119,34 @@ header {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
   }
-  .fade-in {
-    animation: fadeIn 1s ease-in-out;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+.fade-out {
+  animation: fadeOut 0.25s ease-in-out forwards; /* changed from 0.5s to 0.25s */
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.fade-in {
+  animation: fadeIn 0.25s ease-in-out forwards; /* changed from 0.5s to 0.25s */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+  
+  a {
+  color: inherit;         /* Makes the link use the text color of its parent */
+  text-decoration: none;  /* Removes the underline */
+  cursor: pointer;        /* Optional: shows pointer on hover */
+}
+
+a:hover {
+  color: inherit;         /* Keep color the same on hover */
+  text-decoration: none;  /* Keep underline removed on hover */
+}
 </style>
 </head>
 <body>
@@ -143,10 +164,6 @@ header {
           <div class="message-text" id="visible-message">Loading notices...</div>
           <div class="slide-counter" id="visible-counter">Page 1 of 1</div>
         </div>
-        <!-- Right slide: incoming new page (comes from right) -->
-        <div class="message-slide">
-          <div class="message-text" id="incoming-message"></div>
-          <div class="slide-counter" id="incoming-counter"></div>
         </div>
       </div>
     </div>
@@ -198,74 +215,54 @@ function resetCarouselContainers() {
   carousel = document.getElementById('message-carousel');
 }
 
-function displayCurrentPage(withTransition = true) {
-  try {
-    if (processedMessages.length === 0) {
-      incomingMessage.innerHTML = '';
-      incomingCounter.textContent = '';
-      visibleMessage.innerHTML = '';
-      visibleCounter.textContent = '';
-      carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(0)';
-      void carousel.offsetWidth;
-      carousel.style.transition = 'transform 0.75s ease-in-out';
-      return;
-    }
+function displayCurrentPage() {
+  if (processedMessages.length === 0) return;
 
-    const { text, counter } = processedMessages[currentPage];
+let { text, counter } = processedMessages[currentPage];
 
-    // Single page or no transition needed → show directly in visible slide
-    if (processedMessages.length <= 1 || !withTransition) {
-      visibleMessage.innerHTML = text;
-      visibleCounter.textContent = counter;
-      incomingMessage.innerHTML = '';
-      incomingCounter.textContent = '';
-      carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(0)';
-      void carousel.offsetWidth;
-      carousel.style.transition = 'transform 0.75s ease-in-out';
-      return;
-    }
+// Remove any whitespace/newlines immediately after opening tags at the start
+text = text.replace(/^(<[^>]+>)[\s\n]+/, '$1');
 
-    if (isTransitioning) return;
-    isTransitioning = true;
+  // Prevent overlapping transitions
+  if (isTransitioning) return;
+  isTransitioning = true;
 
-    // Place new content in the incoming (right) slide
-    incomingMessage.innerHTML = text;
-    incomingCounter.textContent = counter;
+  // Fade out current content
+  visibleMessage.classList.add('fade-out');
+  visibleCounter.classList.add('fade-out');
 
-    void carousel.offsetWidth; // Force reflow
+  setTimeout(() => {
+    // Update content once faded out
+    visibleMessage.innerHTML = text;
+    visibleCounter.textContent = counter;
 
-    // Animate: move carousel left → new page enters from the right
-    carousel.style.transform = 'translateX(-50%)';
+    // Remove fade-out and fade in new content
+    visibleMessage.classList.remove('fade-out');
+    visibleCounter.classList.remove('fade-out');
 
-    let timeout = setTimeout(() => {
+    visibleMessage.classList.add('fade-in');
+    visibleCounter.classList.add('fade-in');
+
+    setTimeout(() => {
+      visibleMessage.classList.remove('fade-in');
+      visibleCounter.classList.remove('fade-in');
       isTransitioning = false;
-      console.warn('Sliding failed, resetting carousel...');
-      resetCarouselContainers();
-      displayCurrentPage(false);
-    }, 1500);
+    }, 500); // fade-in duration
+  }, 500); // fade-out duration
+}
 
-    carousel.addEventListener('transitionend', function handler() {
-      clearTimeout(timeout);
-      // After animation, copy content to visible slide and reset position
-      visibleMessage.innerHTML = text;
-      visibleCounter.textContent = counter;
-      incomingMessage.innerHTML = '';
-      incomingCounter.textContent = '';
-      carousel.style.transition = 'none';
-      carousel.style.transform = 'translateX(0)';
-      void carousel.offsetWidth;
-      carousel.style.transition = 'transform 0.75s ease-in-out';
-      isTransitioning = false;
-      carousel.removeEventListener('transitionend', handler);
-    }, { once: true });
+// Clean the API text
+function cleanMessage(text) {
+  // Convert <br> to newlines so trimming is consistent
+  text = text.replace(/<br\s*\/?>/gi, '\n');
 
-  } catch (err) {
-    console.error('Error during sliding animation:', err);
-    resetCarouselContainers();
-    setTimeout(() => displayCurrentPage(false), 1000);
-  }
+  // Remove any whitespace/newlines immediately after opening tags
+  text = text.replace(/>(\s*\n\s*)+/, '>');
+
+  // Also remove whitespace at the start of the string outside tags
+  text = text.replace(/^\s+/, '');
+
+  return text;
 }
 
 function nextPage() {
