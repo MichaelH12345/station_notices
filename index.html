@@ -1,98 +1,142 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Station Notices</title>
-<!-- Google Fonts for reliable Open Sans loading -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
+  /* Circular font family */
   @font-face {
-    font-family: 'Open Sans Bold';
-    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Bold.ttf') format('truetype');
+    font-family: 'Circular';
+    src: url('https://raw.githubusercontent.com/Holo-Host/holo-communities/master/public/assets/fonts/Circular-Font-Family/lineto-circular-book.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
   }
+
   @font-face {
-    font-family: 'Open Sans';
-    src: url('https://raw.githubusercontent.com/MichaelH12345/simple-departure-board/main/Open%20Sans%20Regular.ttf') format('truetype');
+    font-family: 'Circular';
+    src: url('https://raw.githubusercontent.com/Holo-Host/holo-communities/master/public/assets/fonts/Circular-Font-Family/lineto-circular-medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
   }
+
+  @font-face {
+    font-family: 'Circular';
+    src: url('https://raw.githubusercontent.com/Holo-Host/holo-communities/master/public/assets/fonts/Circular-Font-Family/lineto-circular-bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Circular';
+    src: url('https://raw.githubusercontent.com/Holo-Host/holo-communities/master/public/assets/fonts/Circular-Font-Family/lineto-circular-black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     margin: 0;
     background-color: black;
     color: white;
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Circular', sans-serif;
+    font-weight: 400;
     overflow: hidden;
     height: 100vh;
     display: flex;
     flex-direction: column;
   }
-header {
-  background-color: #001f4d;
-  border-bottom: 4px solid white;
-  padding-left: 15px;
-  height: 141px;                 /* controls vertical spacing */
-  display: flex;
-  justify-content: center;
-  align-items: center;           /* vertical centring */
-}
 
-  .header-title {
-    font-family: 'Open Sans Bold';
-    font-size: 4rem;
+  header {
+    background-color: #001f4d;
+    border-bottom: 4px solid white;
+    padding-left: 15px;
+    height: 141px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
     align-items: center;
   }
+
+  .header-title {
+    font-family: 'Circular', sans-serif;
+    font-weight: 700;
+    font-size: 4rem;
+    text-align: center;
+  }
+
   .header-row {
     display: flex;
     align-items: center;
     font-size: 2.5rem;
   }
+
   #message-container {
     flex: 1;
+    min-height: 0;
     background-color: black;
-    padding: 0px 20px 20px 20px;
-    box-sizing: border-box;
+    padding: 0 20px 20px;
     display: flex;
     flex-direction: column;
   }
+
   #message-content {
     flex: 1;
+    min-height: 0;
     position: relative;
     overflow: hidden;
   }
+
   #message-carousel {
     display: flex;
     width: 200%;
-    transition: transform 0.75s ease-in-out;
-    transform: translateX(0); /* First slide is the visible/resting position */
     height: 100%;
+    transition: transform 0.75s ease-in-out;
+    transform: translateX(0);
   }
+
   .message-slide {
     width: 50%;
     flex-shrink: 0;
     position: relative;
     height: 100%;
   }
+
   .message-text {
     position: absolute;
     top: 25px;
-    width: 100%;
-    text-align: center;
-    font-size: 3rem;
-    max-width: 75%;
+    width: 75%;
     margin-left: 12.5%;
+    text-align: center;
+    font-family: 'Circular', sans-serif;
+    font-weight: 400;
+    font-size: 3rem;
   }
+
   .slide-counter {
     position: absolute;
     bottom: 92px;
     width: 100%;
+    font-family: 'Circular', sans-serif;
+    font-weight: 500;
     font-size: 3rem;
     color: white;
     text-align: center;
   }
+
   footer {
     position: fixed;
     bottom: 0;
+    left: 0;
     width: 100%;
     height: 87.5px;
     background-color: #001f4d;
@@ -101,54 +145,93 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
-    box-sizing: border-box;
   }
+
   #footer-message {
+    font-family: 'Circular', sans-serif;
+    font-weight: 400;
     font-size: 2.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  #footer-time {
-    font-size: 3.5rem;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 700;
+
+  #footer-page {
+    font-family: 'Circular', sans-serif;
+    font-weight: 500;
   }
-  #footer-time .label {
-    font-size: 60%;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
+
+#footer-time {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Circular', sans-serif;
+  font-weight: 700;
+  font-size: 3.5rem;
+  white-space: nowrap;
+}
+
+#footer-time .label {
+  font-family: 'Circular', sans-serif;
+  font-weight: 400;
+  font-size: 60%;
+}
+
+#footer-clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+#footer-clock .digit {
+  display: inline-flex;
+  width: 0.62em;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#footer-clock .separator {
+  display: inline-flex;
+  width: 0.3em;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+  .fade-out {
+    animation: fadeOut 0.25s ease-in-out forwards;
   }
-.fade-out {
-  animation: fadeOut 0.25s ease-in-out forwards; /* changed from 0.5s to 0.25s */
-}
 
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
 
-.fade-in {
-  animation: fadeIn 0.25s ease-in-out forwards; /* changed from 0.5s to 0.25s */
-}
+  .fade-in {
+    animation: fadeIn 0.25s ease-in-out forwards;
+  }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
   a {
-  color: inherit;         /* Makes the link use the text color of its parent */
-  text-decoration: none;  /* Removes the underline */
-  cursor: pointer;        /* Optional: shows pointer on hover */
-}
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
 
-a:hover {
-  color: inherit;         /* Keep color the same on hover */
-  text-decoration: none;  /* Keep underline removed on hover */
-}
+  a:hover {
+    color: inherit;
+    text-decoration: none;
+  }
 </style>
 </head>
+
 <body>
   <header>
     <div class="header-title" id="header-title">Information</div>
@@ -156,26 +239,40 @@ a:hover {
       <div class="time"></div>
     </div>
   </header>
+
   <div id="message-container">
     <div id="message-content">
       <div id="message-carousel">
-        <!-- Left slide: currently visible / resting position -->
         <div class="message-slide">
-          <div class="message-text" id="visible-message"></div>
-          <div class="slide-counter" id="visible-counter"></div>
+          <div class="message-text" id="visible-message">Loading notices...</div>
+          <div class="slide-counter" id="visible-counter">Page 1 of 1</div>
         </div>
+        <div class="message-slide">
+          <div class="message-text" id="incoming-message"></div>
+          <div class="slide-counter" id="incoming-counter"></div>
         </div>
       </div>
     </div>
   </div>
+
   <footer>
     <div id="footer-message"></div>
     <div id="footer-page"></div>
-    <div id="footer-time">
-      <span class="label">Time now </span>
-      <span id="footer-time-value"></span>
-    </div>
+   <div id="footer-time">
+  <span class="label"></span>
+  <div id="footer-clock">
+    <span class="digit" id="hour-1">0</span>
+    <span class="digit" id="hour-2">0</span>
+    <span class="separator">:</span>
+    <span class="digit" id="minute-1">0</span>
+    <span class="digit" id="minute-2">0</span>
+    <span class="separator">:</span>
+    <span class="digit" id="second-1">0</span>
+    <span class="digit" id="second-2">0</span>
+  </div>
+</div>
   </footer>
+
 <script>
 let footerMessage = document.getElementById('footer-message');
 let footerTimeValue = document.getElementById('footer-time-value');
@@ -186,8 +283,12 @@ let visibleCounter = document.getElementById('visible-counter');
 let carousel = document.getElementById('message-carousel');
 
 let stationCode = localStorage.getItem('stationCode') || 'CAR';
-let API_URL = `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
+
+let API_URL =
+  `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
+
 localStorage.setItem('stationCode', stationCode);
+
 let locationName = stationCode;
 let processedMessages = [];
 let currentPage = 0;
@@ -196,6 +297,7 @@ let isTransitioning = false;
 
 function resetCarouselContainers() {
   const container = document.getElementById('message-content');
+
   container.innerHTML = `
     <div id="message-carousel">
       <div class="message-slide">
@@ -208,6 +310,7 @@ function resetCarouselContainers() {
       </div>
     </div>
   `;
+
   incomingMessage = document.getElementById('incoming-message');
   visibleMessage = document.getElementById('visible-message');
   incomingCounter = document.getElementById('incoming-counter');
@@ -216,27 +319,21 @@ function resetCarouselContainers() {
 }
 
 function displayCurrentPage() {
-  if (processedMessages.length === 0) return;
+  if (processedMessages.length === 0 || isTransitioning) return;
 
-let { text, counter } = processedMessages[currentPage];
+  let { text, counter } = processedMessages[currentPage];
 
-// Remove any whitespace/newlines immediately after opening tags at the start
-text = text.replace(/^(<[^>]+>)[\s\n]+/, '$1');
+  text = text.replace(/^(<[^>]+>)[\s\n]+/, '$1');
 
-  // Prevent overlapping transitions
-  if (isTransitioning) return;
   isTransitioning = true;
 
-  // Fade out current content
   visibleMessage.classList.add('fade-out');
   visibleCounter.classList.add('fade-out');
 
   setTimeout(() => {
-    // Update content once faded out
     visibleMessage.innerHTML = text;
     visibleCounter.textContent = counter;
 
-    // Remove fade-out and fade in new content
     visibleMessage.classList.remove('fade-out');
     visibleCounter.classList.remove('fade-out');
 
@@ -247,46 +344,53 @@ text = text.replace(/^(<[^>]+>)[\s\n]+/, '$1');
       visibleMessage.classList.remove('fade-in');
       visibleCounter.classList.remove('fade-in');
       isTransitioning = false;
-    }, 500); // fade-in duration
-  }, 500); // fade-out duration
+    }, 250);
+  }, 250);
 }
 
-// Clean the API text
 function cleanMessage(text) {
-  // Convert <br> to newlines so trimming is consistent
   text = text.replace(/<br\s*\/?>/gi, '\n');
-
-  // Remove any whitespace/newlines immediately after opening tags
   text = text.replace(/>(\s*\n\s*)+/, '>');
-
-  // Also remove whitespace at the start of the string outside tags
   text = text.replace(/^\s+/, '');
-
   return text;
 }
 
 function nextPage() {
   if (processedMessages.length <= 1) return;
+
   currentPage = (currentPage + 1) % processedMessages.length;
-  displayCurrentPage(true);
+  displayCurrentPage();
 }
 
 async function fetchNRCCMessages() {
   try {
     const response = await fetch(API_URL);
-    if (!response.ok) throw new Error('API error');
+
+    if (!response.ok) {
+      throw new Error('API error');
+    }
+
     const data = await response.json();
+
     locationName = data.locationName || stationCode;
 
     const rawMessages = data.nrccMessages || [];
 
     let alertSummaries = [];
+
     try {
-      const alertsResp = await fetch('https://corsproxy.io/?https://www.nationalrail.co.uk/nreapi/incidents/alerts/');
+      const alertsResp = await fetch(
+        'https://corsproxy.io/?https://www.nationalrail.co.uk/nreapi/incidents/alerts/'
+      );
+
       if (alertsResp.ok) {
         const alertsData = await alertsResp.json();
+
         alertSummaries = alertsData
-          .filter(item => Array.isArray(item.affectedTocs) && item.affectedTocs.includes('National Rail'))
+          .filter(item =>
+            Array.isArray(item.affectedTocs) &&
+            item.affectedTocs.includes('National Rail')
+          )
           .map(item => ({
             text: `${item.summary}.<br><br>For more details,<br>visit nationalrail.co.uk.`,
             counter: ''
@@ -298,17 +402,24 @@ async function fetchNRCCMessages() {
 
     const nrccProcessed = rawMessages.map(msg => {
       let text = msg.value || '';
+
       const phrases = [
         'Latest information can be found in',
         'More details can be found in'
       ];
+
       for (const phrase of phrases) {
         const cutIndex = text.indexOf(phrase);
+
         if (cutIndex !== -1) {
-          text = text.substring(0, cutIndex) + '<br><br>For more details,<br>visit nationalrail.co.uk.';
+          text =
+            text.substring(0, cutIndex) +
+            '<br><br>For more details,<br>visit nationalrail.co.uk.';
+
           break;
         }
       }
+
       return { text, counter: '' };
     });
 
@@ -327,16 +438,18 @@ async function fetchNRCCMessages() {
     }));
 
     currentPage = 0;
-    displayCurrentPage(false);
+    displayCurrentPage();
 
   } catch (err) {
     console.error('Failed to fetch NRCC messages:', err);
+
     processedMessages = [{
       text: `Welcome to<br>${locationName}.<br><br>For live travel information, speak to station staff, download our app or visit nationalrail.co.uk.`,
       counter: 'Page 1 of 1'
     }];
+
     currentPage = 0;
-    displayCurrentPage(false);
+    displayCurrentPage();
   }
 }
 
@@ -353,17 +466,22 @@ setInterval(() => {
 
 function updateFooterTime() {
   const now = new Date();
-  const seconds = now.getSeconds();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
 
-  footerTimeValue.textContent = now.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
+  document.getElementById('hour-1').textContent = hours[0];
+  document.getElementById('hour-2').textContent = hours[1];
 
-  if (seconds % 10 === 0 && seconds !== lastPageChangeSecond) {
-    lastPageChangeSecond = seconds;
+  document.getElementById('minute-1').textContent = minutes[0];
+  document.getElementById('minute-2').textContent = minutes[1];
+
+  document.getElementById('second-1').textContent = seconds[0];
+  document.getElementById('second-2').textContent = seconds[1];
+
+  if (now.getSeconds() % 10 === 0 &&
+      now.getSeconds() !== lastPageChangeSecond) {
+    lastPageChangeSecond = now.getSeconds();
     nextPage();
   }
 }
@@ -371,14 +489,25 @@ function updateFooterTime() {
 setInterval(updateFooterTime, 1000);
 updateFooterTime();
 
+setInterval(updateFooterTime, 1000);
+updateFooterTime();
+
 function updateFooterDate() {
   const now = new Date();
-  const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
+
+  const weekday = now.toLocaleDateString('en-GB', {
+    weekday: 'long'
+  });
+
   const day = now.getDate();
-  const month = now.toLocaleDateString('en-GB', { month: 'long' });
+
+  const month = now.toLocaleDateString('en-GB', {
+    month: 'long'
+  });
 
   function getOrdinal(n) {
     if (n >= 11 && n <= 13) return n + 'th';
+
     switch (n % 10) {
       case 1: return n + 'st';
       case 2: return n + 'nd';
@@ -386,21 +515,29 @@ function updateFooterDate() {
       default: return n + 'th';
     }
   }
-  footerMessage.textContent = `${weekday} ${getOrdinal(day)} ${month}`;
+
+  footerMessage.textContent =
+    `${weekday} ${getOrdinal(day)} ${month}`;
 }
+
 updateFooterDate();
 
 // Click header to change station
 const headerTitle = document.getElementById('header-title');
+
 headerTitle.style.cursor = 'pointer';
 headerTitle.title = 'Click to change station code';
 
 headerTitle.addEventListener('click', () => {
   const newStation = prompt('Enter new station code (e.g., CAR, PAD):');
+
   if (newStation && newStation.trim() !== '') {
     stationCode = newStation.trim().toUpperCase();
+
     localStorage.setItem('stationCode', stationCode);
-    API_URL = `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
+
+    API_URL =
+      `https://huxley2.azurewebsites.net/departures/${stationCode}/25?accessToken=e48245fd-c8d4-46b5-87ef-60e71665e6b6`;
 
     visibleMessage.innerHTML = 'Loading notices...';
     incomingMessage.innerHTML = '';
@@ -413,9 +550,11 @@ headerTitle.addEventListener('click', () => {
 
 function resetToFirstMessageWithFade() {
   currentPage = 0;
-  displayCurrentPage(false);
+  displayCurrentPage();
+
   visibleMessage.classList.add('fade-in');
   visibleCounter.classList.add('fade-in');
+
   setTimeout(() => {
     visibleMessage.classList.remove('fade-in');
     visibleCounter.classList.remove('fade-in');
@@ -423,6 +562,7 @@ function resetToFirstMessageWithFade() {
 }
 
 window.addEventListener('resize', resetToFirstMessageWithFade);
+
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     resetToFirstMessageWithFade();
